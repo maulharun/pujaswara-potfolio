@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, onSnapshot } from "firebase/firestore"; 
+import { getFirestore, collection, addDoc, onSnapshot } from "firebase/firestore";  // Hapus getDocs jika tidak digunakan
 
 const firebaseConfig = {
   apiKey: "AIzaSyBi-vlhXJQB9D70xPoXDUxYc0oMNfdHIj0",
