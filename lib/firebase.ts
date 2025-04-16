@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore"; 
+import { getFirestore, collection, addDoc, getDocs, onSnapshot } from "firebase/firestore"; 
 
 const firebaseConfig = {
   apiKey: "AIzaSyBi-vlhXJQB9D70xPoXDUxYc0oMNfdHIj0",
@@ -17,6 +17,15 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firestore
 const db = getFirestore(app);
 
+// Define the CommentType
+type CommentType = {
+  id: string;
+  name: string;
+  text: string;
+  rating: number;
+  createdAt: Date;
+};
+
 // Save a comment to Firestore
 async function saveComment(name: string, text: string, rating: number) {
   try {
@@ -32,14 +41,20 @@ async function saveComment(name: string, text: string, rating: number) {
   }
 }
 
-// Get all comments from Firestore
-async function getAllComments() {
-  const querySnapshot = await getDocs(collection(db, "comments"));
-  return querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
+// Real-time listener for comments
+function subscribeToComments(callback: (comments: CommentType[]) => void) {
+  const unsubscribe = onSnapshot(collection(db, "comments"), (querySnapshot) => {
+    const comments = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      name: doc.data().name,
+      text: doc.data().text,
+      rating: doc.data().rating,
+      createdAt: doc.data().createdAt.toDate() // Convert to Date object if needed
+    }));
+    callback(comments);
+  });
+  return unsubscribe; // Return the unsubscribe function for cleanup
 }
 
 // Export db and helper functions
-export { db, saveComment, getAllComments };
+export { db, saveComment, subscribeToComments };
