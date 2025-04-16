@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     let data;
     try {
       data = JSON.parse(raw);
-    } catch (jsonError) {
+    } catch {
       throw new Error(`Gagal parsing JSON dari OpenRouter: ${raw}`);
     }
 
@@ -42,8 +42,14 @@ export async function POST(req: NextRequest) {
 
     const reply = data.choices?.[0]?.message?.content ?? 'Maaf, saya tidak tahu jawabannya.';
     return NextResponse.json({ reply });
-  } catch (err: any) {
-    console.error('Error saat memanggil OpenRouter:', err.message);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    let errorMessage = 'Terjadi kesalahan.';
+    if (err instanceof Error) {
+      console.error('Error saat memanggil OpenRouter:', err.message);
+      errorMessage = err.message;
+    } else {
+      console.error('Error tidak diketahui saat memanggil OpenRouter:', err);
+    }
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
