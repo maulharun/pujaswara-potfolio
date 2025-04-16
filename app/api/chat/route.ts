@@ -3,52 +3,43 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   const { message } = await req.json();
 
-  if (!message) {
-    return NextResponse.json({ error: 'Pesan tidak boleh kosong.' }, { status: 400 });
-  }
-
-  console.log('API KEY:', process.env.OPENROUTER_API_KEY ? 'Loaded ✅' : 'Not Loaded ❌');
-  console.log('Pesan dari user:', message);
-
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'openai/gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: 'Kamu adalah asisten yang membantu dan menjawab dalam Bahasa Indonesia.' },
-          { role: 'user', content: message },
-        ],
-      }),
-    });
-
-    const raw = await response.text();
-
-    let data;
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      throw new Error(`Gagal parsing JSON dari OpenRouter: ${raw}`);
-    }
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: message,
+                },
+              ],
+            },
+          ],
+        }),
+      }
+    );
 
     if (!response.ok) {
-      const errMsg = data.error?.message || 'Terjadi kesalahan dari OpenRouter';
-      throw new Error(errMsg);
+      const error = await response.json();
+      throw new Error(error.error?.message || 'Unknown error from Gemini API');
     }
 
-    const reply = data.choices?.[0]?.message?.content ?? 'Maaf, saya tidak tahu jawabannya.';
+    const data = await response.json();
+    const reply =
+      data.candidates?.[0]?.content?.parts?.[0]?.text || 'Maaf, saya tidak tahu jawabannya.';
+
     return NextResponse.json({ reply });
   } catch (err: unknown) {
-    let errorMessage = 'Terjadi kesalahan.';
+    let errorMessage = 'Terjadi kesalahan saat menghubungi Gemini API.';
     if (err instanceof Error) {
-      console.error('Error saat memanggil OpenRouter:', err.message);
+      console.error('Error from Gemini API:', err.message);
       errorMessage = err.message;
-    } else {
-      console.error('Error tidak diketahui saat memanggil OpenRouter:', err);
     }
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
