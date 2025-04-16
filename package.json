@@ -1,0 +1,30 @@
+{
+  "name": "chatbot-nextjs",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "firebase": "^11.6.0",
+    "framer-motion": "^12.6.3",
+    "lucide-react": "^0.487.0",
+    "next": "^15.3.0",
+    "openai": "^4.93.0",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-icons": "^5.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/react": "19.1.2",
+    "autoprefixer": "latest",
+    "eslint": "^9.24.0",
+    "eslint-config-next": "^15.3.0",
+    "postcss": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest"
+  }
+}
