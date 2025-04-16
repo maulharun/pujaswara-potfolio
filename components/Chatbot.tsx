@@ -8,6 +8,7 @@ export default function ChatBot() {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+
     const userMessage = input;
     setMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
     setInput('');
@@ -15,13 +16,12 @@ export default function ChatBot() {
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage }),
       });
 
       const data = await res.json();
+
       if (data.reply) {
         setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
       } else {
@@ -29,19 +29,25 @@ export default function ChatBot() {
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      setMessages((prev) => [...prev, { role: 'assistant', content: 'Error dalam mengirim pesan.' }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Terjadi kesalahan saat mengirim pesan.' }]);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-4 flex flex-col">
-        <h2 className="text-center text-2xl font-bold mb-4">Chatbot Pintar</h2>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gray-100">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-4 flex flex-col">
+        <h2 className="text-center text-2xl font-bold mb-4">Chatbot Gemini AI</h2>
 
         <div className="flex-1 overflow-y-auto mb-4 space-y-2 max-h-80">
           {messages.map((msg, idx) => (
             <div key={idx} className={msg.role === 'user' ? 'text-right' : 'text-left'}>
-              <span className="inline-block bg-gray-200 rounded-lg px-3 py-2 text-sm">{msg.content}</span>
+              <span
+                className={`inline-block px-3 py-2 rounded-lg text-sm ${
+                  msg.role === 'user' ? 'bg-blue-200 text-black' : 'bg-gray-200 text-black'
+                }`}
+              >
+                {msg.content}
+              </span>
             </div>
           ))}
         </div>
@@ -53,7 +59,9 @@ export default function ChatBot() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Tulis pesanmu..."
-            onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') sendMessage();
+            }}
           />
           <button
             onClick={sendMessage}
